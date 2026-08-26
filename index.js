@@ -18,9 +18,13 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 const db = mysql.createConnection({
     host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME
+    database: process.env.DB_NAME,
+    ssl: {
+        rejectUnauthorized: false
+    }
 });
 
 db.connect((err) => {
@@ -323,8 +327,8 @@ app.get("/profile", authenticateToken, (req, res) => {
 
 // Start Server
 
-app.listen(3000, () => {
+const PORT = process.env.PORT || 3000;
 
-    console.log("Server is running on port 3000");
-
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server is running on port ${PORT}`);
 });
