@@ -185,7 +185,7 @@ registerForm.addEventListener("submit", async function (event) {
     try {
 
         const response = await fetch(
-            "http://localhost:3000/users",
+            "https://node-authentication-project-production.up.railway.app/users",
             {
                 method: "POST",
 
@@ -256,7 +256,7 @@ loginForm.addEventListener("submit", async function (event) {
     try {
 
         const response = await fetch(
-            "http://localhost:3000/login",
+            "https://node-authentication-project-production.up.railway.app/login",
             {
                 method: "POST",
 
@@ -321,7 +321,7 @@ async function getProfile() {
     try {
 
         const response = await fetch(
-            "http://localhost:3000/profile",
+            "https://node-authentication-project-production.up.railway.app/profile",
             {
                 method: "GET",
 
