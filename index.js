@@ -320,7 +320,38 @@ app.get("/profile", authenticateToken, (req, res) => {
     });
 
 });
+// POST - Create new task
+app.post("/api/tasks", (req, res) => {
 
+    const { title } = req.body;
+
+    // Title validation
+    if (!title || title.trim() === "") {
+        return res.status(400).json({
+            error: "Title is required"
+        });
+    }
+
+    const sql = "INSERT INTO tasks (title) VALUES (?)";
+
+    db.query(sql, [title], (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                error: "Failed to create task"
+            });
+        }
+
+        res.status(201).json({
+            id: result.insertId,
+            title: title,
+            is_done: false,
+            created_at: new Date()
+        });
+
+    });
+
+});
 // ==================
 // TASKS API
 // ==================
