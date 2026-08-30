@@ -381,6 +381,32 @@ app.patch("/api/tasks/:id", (req, res) => {
     });
 
 });
+// DELETE - Delete a task
+app.delete("/api/tasks/:id", (req, res) => {
+
+    const { id } = req.params;
+
+    const sql = "DELETE FROM tasks WHERE id = ?";
+
+    db.query(sql, [id], (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                error: "Failed to delete task"
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
+
+        res.status(204).send();
+
+    });
+
+});
 // ==================
 // TASKS API
 // ==================
