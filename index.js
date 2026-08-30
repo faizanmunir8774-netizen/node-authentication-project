@@ -352,6 +352,35 @@ app.post("/api/tasks", (req, res) => {
     });
 
 });
+// PATCH - Update is_done
+app.patch("/api/tasks/:id", (req, res) => {
+
+    const { id } = req.params;
+    const { is_done } = req.body;
+
+    const sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
+
+    db.query(sql, [is_done, id], (err, result) => {
+
+        if (err) {
+            return res.status(500).json({
+                error: "Failed to update task"
+            });
+        }
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({
+                error: "Task not found"
+            });
+        }
+
+        res.json({
+            message: "Task updated successfully"
+        });
+
+    });
+
+});
 // ==================
 // TASKS API
 // ==================
