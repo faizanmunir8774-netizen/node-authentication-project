@@ -321,7 +321,28 @@ app.get("/profile", authenticateToken, (req, res) => {
 
 });
 
+// ==================
+// TASKS API
+// ==================
 
+// GET all tasks
+app.get("/api/tasks", (req, res) => {
+
+    const sql = "SELECT * FROM tasks";
+
+    db.query(sql, (err, results) => {
+
+        if (err) {
+            return res.status(500).json({
+                error: "Failed to fetch tasks"
+            });
+        }
+
+        res.json(results);
+
+    });
+
+});
 // Start Server
 
 const PORT = process.env.PORT || 3000;
