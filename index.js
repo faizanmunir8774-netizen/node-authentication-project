@@ -25,23 +25,18 @@ const db = mysql.createConnection({
 });
 
 db.connect((err) => {
-
     if (err) {
         console.log("MySQL connection failed:", err.message);
         return;
     }
-
     console.log("MySQL connected successfully!");
-
 });
 
 
 // Home Route
 
 app.get("/", (req, res) => {
-
     res.send("Node.js + MySQL server is working!");
-
 });
 
 
@@ -52,17 +47,12 @@ app.get("/users", (req, res) => {
     const sql = "SELECT id, name, email FROM users";
 
     db.query(sql, (err, results) => {
-
         if (err) {
-
             return res.status(500).json({
                 message: "Failed to fetch users"
             });
-
         }
-
         res.json(results);
-
     });
 
 });
@@ -74,89 +64,49 @@ app.post("/users", (req, res) => {
 
     const { name, email, password } = req.body;
 
-
-    // Input validation
-
     if (!name || !email || !password) {
-
         return res.status(400).json({
             message: "Name, email and password are required"
         });
-
     }
 
-
-    // Password length validation
-
     if (password.length < 6) {
-
         return res.status(400).json({
             message: "Password must be at least 6 characters long"
         });
-
     }
 
-
-    // Email format validation
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
     if (!emailRegex.test(email)) {
-
         return res.status(400).json({
             message: "Please provide a valid email address"
         });
-
     }
-
-
-    // Hash password
 
     const hashedPassword = bcrypt.hashSync(password, 10);
 
+    const sql = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
 
-    const sql =
-        "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
+    db.query(sql, [name, email, hashedPassword], (err, result) => {
 
-
-    db.query(
-        sql,
-        [name, email, hashedPassword],
-        (err, result) => {
-
-            if (err) {
-
-                console.log("Insert failed:", err.message);
-
-
-                // Duplicate email
-
-                if (err.code === "ER_DUP_ENTRY") {
-
-                    return res.status(409).json({
-                        message: "Email already exists"
-                    });
-
-                }
-
-
-                return res.status(500).json({
-                    message: "Failed to create user"
+        if (err) {
+            console.log("Insert failed:", err.message);
+            if (err.code === "ER_DUP_ENTRY") {
+                return res.status(409).json({
+                    message: "Email already exists"
                 });
-
             }
-
-
-            res.status(201).json({
-
-                message: "User created successfully",
-
-                userId: result.insertId
-
+            return res.status(500).json({
+                message: "Failed to create user"
             });
-
         }
-    );
+
+        res.status(201).json({
+            message: "User created successfully",
+            userId: result.insertId
+        });
+
+    });
 
 });
 
@@ -167,100 +117,56 @@ app.post("/login", (req, res) => {
 
     const { email, password } = req.body;
 
-
-    // Login input validation
-
     if (!email || !password) {
-
         return res.status(400).json({
             message: "Email and password are required"
         });
-
     }
 
-
-    const sql =
-        "SELECT id, name, email, password FROM users WHERE email = ?";
-
+    const sql = "SELECT id, name, email, password FROM users WHERE email = ?";
 
     db.query(sql, [email], (err, results) => {
 
         if (err) {
-
             return res.status(500).json({
                 message: "Login failed"
             });
-
         }
 
-
-        // User not found
-
         if (results.length === 0) {
-
             return res.status(401).json({
                 message: "Invalid email or password"
             });
-
         }
-
 
         const user = results[0];
 
-
-        // Compare password
-
-        const passwordMatch = bcrypt.compareSync(
-            password,
-            user.password
-        );
-
-
-        // Wrong password
+        const passwordMatch = bcrypt.compareSync(password, user.password);
 
         if (!passwordMatch) {
-
             return res.status(401).json({
                 message: "Invalid email or password"
             });
-
         }
 
-
-        // Create JWT token
-        // Name is included so profile can display it
-
         const token = jwt.sign(
-
             {
                 id: user.id,
                 name: user.name,
                 email: user.email
             },
-
             JWT_SECRET,
-
-            {
-                expiresIn: "1h"
-            }
-
+            { expiresIn: "1h" }
         );
 
-
-        // Successful login
-
         res.json({
-
             message: "Login successful",
-
             token: token,
-
             user: {
                 id: user.id,
                 name: user.name,
                 email: user.email
             }
-
         });
 
     });
@@ -273,35 +179,22 @@ app.post("/login", (req, res) => {
 function authenticateToken(req, res, next) {
 
     const authHeader = req.headers["authorization"];
-
-    const token =
-        authHeader && authHeader.split(" ")[1];
-
+    const token = authHeader && authHeader.split(" ")[1];
 
     if (!token) {
-
         return res.status(401).json({
             message: "Access denied. Token required."
         });
-
     }
 
-
     jwt.verify(token, JWT_SECRET, (err, user) => {
-
         if (err) {
-
             return res.status(403).json({
                 message: "Invalid or expired token."
             });
-
         }
-
-
         req.user = user;
-
         next();
-
     });
 
 }
@@ -310,32 +203,50 @@ function authenticateToken(req, res, next) {
 // Protected Profile Route
 
 app.get("/profile", authenticateToken, (req, res) => {
-
     res.json({
-
         message: "You accessed a protected route!",
-
         user: req.user
+    });
+});
 
+
+// ==================
+// TASKS API
+// ==================
+
+// GET all tasks - only logged in user's tasks
+app.get("/api/tasks", authenticateToken, (req, res) => {
+
+    const userId = req.user.id;
+    const sql = "SELECT * FROM tasks WHERE user_id = ?";
+
+    db.query(sql, [userId], (err, results) => {
+        if (err) {
+            return res.status(500).json({
+                error: "Failed to fetch tasks"
+            });
+        }
+        res.json(results);
     });
 
 });
-// POST - Create new task
-app.post("/api/tasks", (req, res) => {
 
+
+// POST - Create new task
+app.post("/api/tasks", authenticateToken, (req, res) => {
+
+    const userId = req.user.id;
     const { title } = req.body;
 
-    // Title validation
     if (!title || title.trim() === "") {
         return res.status(400).json({
             error: "Title is required"
         });
     }
 
-    const sql = "INSERT INTO tasks (title) VALUES (?)";
+    const sql = "INSERT INTO tasks (title, user_id) VALUES (?, ?)";
 
-    db.query(sql, [title], (err, result) => {
-
+    db.query(sql, [title, userId], (err, result) => {
         if (err) {
             return res.status(500).json({
                 error: "Failed to create task"
@@ -348,20 +259,21 @@ app.post("/api/tasks", (req, res) => {
             is_done: false,
             created_at: new Date()
         });
-
     });
 
 });
-// PATCH - Update is_done
-app.patch("/api/tasks/:id", (req, res) => {
 
+
+// PATCH - Update is_done
+app.patch("/api/tasks/:id", authenticateToken, (req, res) => {
+
+    const userId = req.user.id;
     const { id } = req.params;
     const { is_done } = req.body;
 
-    const sql = "UPDATE tasks SET is_done = ? WHERE id = ?";
+    const sql = "UPDATE tasks SET is_done = ? WHERE id = ? AND user_id = ?";
 
-    db.query(sql, [is_done, id], (err, result) => {
-
+    db.query(sql, [is_done, id, userId], (err, result) => {
         if (err) {
             return res.status(500).json({
                 error: "Failed to update task"
@@ -377,19 +289,20 @@ app.patch("/api/tasks/:id", (req, res) => {
         res.json({
             message: "Task updated successfully"
         });
-
     });
 
 });
-// DELETE - Delete a task
-app.delete("/api/tasks/:id", (req, res) => {
 
+
+// DELETE - Delete a task
+app.delete("/api/tasks/:id", authenticateToken, (req, res) => {
+
+    const userId = req.user.id;
     const { id } = req.params;
 
-    const sql = "DELETE FROM tasks WHERE id = ?";
+    const sql = "DELETE FROM tasks WHERE id = ? AND user_id = ?";
 
-    db.query(sql, [id], (err, result) => {
-
+    db.query(sql, [id, userId], (err, result) => {
         if (err) {
             return res.status(500).json({
                 error: "Failed to delete task"
@@ -403,32 +316,11 @@ app.delete("/api/tasks/:id", (req, res) => {
         }
 
         res.status(204).send();
-
     });
 
 });
-// ==================
-// TASKS API
-// ==================
 
-// GET all tasks
-app.get("/api/tasks", (req, res) => {
 
-    const sql = "SELECT * FROM tasks";
-
-    db.query(sql, (err, results) => {
-
-        if (err) {
-            return res.status(500).json({
-                error: "Failed to fetch tasks"
-            });
-        }
-
-        res.json(results);
-
-    });
-
-});
 // Start Server
 
 const PORT = process.env.PORT || 3000;

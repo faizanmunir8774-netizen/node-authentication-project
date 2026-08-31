@@ -13,7 +13,6 @@ const registerLink = document.getElementById("registerLink");
 const loginLink = document.getElementById("loginLink");
 
 const tabs = document.querySelector(".tabs");
-
 const headerSubtitle = document.querySelector(".header p");
 
 
@@ -259,12 +258,19 @@ logoutButton.addEventListener("click", function () {
 
 async function loadTasks() {
 
+    const token = localStorage.getItem("token");
     const taskList = document.getElementById("taskList");
     const taskMessage = document.getElementById("taskMessage");
 
     try {
 
-        const response = await fetch("http://localhost:3000/api/tasks");
+        const response = await fetch("http://localhost:3000/api/tasks", {
+            method: "GET",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
+        });
+
         const tasks = await response.json();
 
         taskList.innerHTML = "";
@@ -312,13 +318,11 @@ function renderTask(task) {
         <button class="delete-btn">Delete</button>
     `;
 
-    // Checkbox - mark done/undone
     const checkbox = li.querySelector(".task-checkbox");
     checkbox.addEventListener("change", function () {
         updateTask(task.id, checkbox.checked);
     });
 
-    // Delete button
     const deleteBtn = li.querySelector(".delete-btn");
     deleteBtn.addEventListener("click", function () {
         deleteTask(task.id, li);
@@ -337,6 +341,7 @@ const addTaskBtn = document.getElementById("addTaskBtn");
 
 addTaskBtn.addEventListener("click", async function () {
 
+    const token = localStorage.getItem("token");
     const taskInput = document.getElementById("taskInput");
     const taskMessage = document.getElementById("taskMessage");
     const title = taskInput.value.trim();
@@ -350,7 +355,10 @@ addTaskBtn.addEventListener("click", async function () {
 
         const response = await fetch("http://localhost:3000/api/tasks", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
             body: JSON.stringify({ title })
         });
 
@@ -378,13 +386,17 @@ addTaskBtn.addEventListener("click", async function () {
 
 async function updateTask(id, is_done) {
 
+    const token = localStorage.getItem("token");
     const taskMessage = document.getElementById("taskMessage");
 
     try {
 
         const response = await fetch(`http://localhost:3000/api/tasks/${id}`, {
             method: "PATCH",
-            headers: { "Content-Type": "application/json" },
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": "Bearer " + token
+            },
             body: JSON.stringify({ is_done })
         });
 
@@ -392,7 +404,6 @@ async function updateTask(id, is_done) {
             taskMessage.textContent = "Failed to update task.";
         }
 
-        // Update the title style
         const li = document.querySelector(`[data-id="${id}"]`);
         const titleSpan = li.querySelector(".task-title");
 
@@ -416,12 +427,16 @@ async function updateTask(id, is_done) {
 
 async function deleteTask(id, li) {
 
+    const token = localStorage.getItem("token");
     const taskMessage = document.getElementById("taskMessage");
 
     try {
 
         const response = await fetch(`http://localhost:3000/api/tasks/${id}`, {
-            method: "DELETE"
+            method: "DELETE",
+            headers: {
+                "Authorization": "Bearer " + token
+            }
         });
 
         if (response.status === 204) {
