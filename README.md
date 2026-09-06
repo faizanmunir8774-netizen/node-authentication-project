@@ -1,6 +1,10 @@
 # Node.js Authentication + To-Do App
 
-A full-stack web application with user authentication and a to-do list feature.
+A full-stack web application with user authentication and to-do list feature.
+
+## Live URL
+
+https://node-authentication-project-production.up.railway.app
 
 ## What the app does
 
@@ -9,18 +13,31 @@ A full-stack web application with user authentication and a to-do list feature.
 - Protected profile page
 - Add, complete, and delete to-do tasks
 - Tasks are saved in MySQL database
+- Each user sees only their own tasks
+
+## Folder Structure
+
+node-project/
+├── middleware/
+│ └── auth.js # JWT authentication middleware
+├── public/ # Frontend files served by Express
+│ ├── index.html
+│ ├── script.js
+│ └── style.css
+├── routes/
+│ ├── auth.js # Register, Login, Profile routes
+│ └── tasks.js # Tasks API routes
+├── db.js # MySQL connection pool
+├── index.js # Main server file
+├── .env.example # Environment variables example
+└── package.json
+
 
 ## How to install
 
 npm install
 
 ## How to create the database
-
-Run these SQL queries in MySQL Workbench:
-
-CREATE DATABASE node_auth;
-
-USE node_auth;
 
 CREATE TABLE users (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -34,7 +51,8 @@ CREATE TABLE tasks (
     id INT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     is_done BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    user_id INT NOT NULL DEFAULT 1
 );
 
 ## How to configure .env
@@ -53,4 +71,4 @@ PORT=3000
 
 npm start
 
-Then open Frontend/index.html in your browser.
+Then open http://localhost:3000 in your browser.
