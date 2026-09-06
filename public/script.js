@@ -127,14 +127,11 @@ registerForm.addEventListener("submit", async function (event) {
 
     try {
 
-        const response = await fetch(
-            "http://localhost:3000/users",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ name, email, password })
-            }
-        );
+        const response = await fetch("/users", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name, email, password })
+        });
 
         const data = await response.json();
         message.textContent = data.message;
@@ -168,14 +165,11 @@ loginForm.addEventListener("submit", async function (event) {
 
     try {
 
-        const response = await fetch(
-            "http://localhost:3000/login",
-            {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            }
-        );
+        const response = await fetch("/login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password })
+        });
 
         const data = await response.json();
         message.textContent = data.message;
@@ -208,13 +202,10 @@ async function getProfile() {
 
     try {
 
-        const response = await fetch(
-            "http://localhost:3000/profile",
-            {
-                method: "GET",
-                headers: { "Authorization": "Bearer " + token }
-            }
-        );
+        const response = await fetch("/profile", {
+            method: "GET",
+            headers: { "Authorization": "Bearer " + token }
+        });
 
         const data = await response.json();
 
@@ -264,7 +255,7 @@ async function loadTasks() {
 
     try {
 
-        const response = await fetch("http://localhost:3000/api/tasks", {
+        const response = await fetch("/api/tasks", {
             method: "GET",
             headers: {
                 "Authorization": "Bearer " + token
@@ -353,7 +344,7 @@ addTaskBtn.addEventListener("click", async function () {
 
     try {
 
-        const response = await fetch("http://localhost:3000/api/tasks", {
+        const response = await fetch("/api/tasks", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -391,7 +382,7 @@ async function updateTask(id, is_done) {
 
     try {
 
-        const response = await fetch(`http://localhost:3000/api/tasks/${id}`, {
+        const response = await fetch(`/api/tasks/${id}`, {
             method: "PATCH",
             headers: {
                 "Content-Type": "application/json",
@@ -432,7 +423,7 @@ async function deleteTask(id, li) {
 
     try {
 
-        const response = await fetch(`http://localhost:3000/api/tasks/${id}`, {
+        const response = await fetch(`/api/tasks/${id}`, {
             method: "DELETE",
             headers: {
                 "Authorization": "Bearer " + token
