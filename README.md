@@ -19,19 +19,26 @@ https://node-authentication-project-production.up.railway.app
 
 node-project/
 ├── middleware/
-│ └── auth.js # JWT authentication middleware
-├── public/ # Frontend files served by Express
-│ ├── index.html
-│ ├── script.js
-│ └── style.css
+│   └── auth.js          # JWT authentication middleware
+├── public/              # Frontend files served by Express
+│   ├── index.html
+│   ├── script.js
+│   └── style.css
 ├── routes/
-│ ├── auth.js # Register, Login, Profile routes
-│ └── tasks.js # Tasks API routes
-├── db.js # MySQL connection pool
-├── index.js # Main server file
-├── .env.example # Environment variables example
+│   ├── auth.js          # Register, Login, Profile routes
+│   └── tasks.js         # Tasks API routes
+├── db.js                # MySQL connection pool
+├── index.js             # Main server file
+├── test-auth.js         # Auth API tests (12 tests)
+├── test-api.js          # Tasks API tests (8 tests)
+├── .env.example         # Environment variables example
 └── package.json
 
+## Deployment
+
+Deployed on Railway with MySQL database service.
+Frontend is served directly from Express using express.static,
+so one URL does everything — no separate Netlify needed.
 
 ## How to install
 
@@ -67,8 +74,12 @@ DB_PASSWORD=your_mysql_password
 DB_NAME=node_auth
 PORT=3000
 
-## How to run
+## How to run locally
 
 npm start
 
 Then open http://localhost:3000 in your browser.
+
+## Test Results
+
+![All Tests Passing](./tests-screenshot.png)
