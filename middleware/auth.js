@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 
 const JWT_SECRET = process.env.JWT_SECRET;
 
-function authenticateToken(req, res, next) {
+async function authenticateToken(req, res, next) {
 
     const authHeader = req.headers["authorization"];
     const token = authHeader && authHeader.split(" ")[1];
@@ -13,15 +13,15 @@ function authenticateToken(req, res, next) {
         });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({
-                message: "Invalid or expired token."
-            });
-        }
+    try {
+        const user = jwt.verify(token, JWT_SECRET);
         req.user = user;
         next();
-    });
+    } catch (err) {
+        return res.status(403).json({
+            message: "Invalid or expired token."
+        });
+    }
 
 }
 
